@@ -97,7 +97,7 @@ MAP SECTION
 }
 
 /* ==========================================================================
-   MAP INFO CARD
+MAP INFO CARD
    ========================================================================== */
 
 .map-info-card {
@@ -305,39 +305,37 @@ SECTION HEADER
 }
 
 /* ==========================================================================
-PANELS CONTAINER
+PANELS CONTAINER (FINAL FIX)
    ========================================================================== */
 
 .bottom-panels-container {
     position: relative;
     z-index: 2;
 
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 30px;
 
-    align-items: flex-start;
-    flex-wrap: wrap;
+    align-items: start;
 }
 
 /* ==========================================================================
-PANEL CARD
+PANEL CARD (FINAL FIX)
    ========================================================================== */
 
 .panel-group {
-    flex: 1;
-    min-width: 360px;
+    width: 100%;
+    min-width: 0;
 
     background: white;
 
     border-radius: 30px;
 
-    border:
-        2px solid rgba(46,125,50,0.12);
+    border: 2px solid rgba(46, 125, 50, 0.12);
 
-    overflow: visible;
+    overflow: hidden;
 
-    box-shadow:
-        0 12px 30px rgba(0,0,0,0.08);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 
     transition: 0.3s ease;
 }
@@ -345,10 +343,27 @@ PANEL CARD
 .panel-group:hover {
     transform: translateY(-5px);
 
-    box-shadow:
-        0 20px 40px rgba(46,125,50,0.16);
+    box-shadow: 0 20px 40px rgba(46, 125, 50, 0.16);
 }
 
+.panel-group table {
+    width: 100%;
+    table-layout: fixed;
+
+    border-collapse: separate;
+    border-spacing: 0 14px;
+}
+
+.panel-group th,
+.panel-group td {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.panel-content {
+    padding: 10px 24px 24px 24px;
+    overflow-x: auto;
+}
 /* ==========================================================================
 PANEL HEADER
    ========================================================================== */
@@ -674,7 +689,7 @@ PLANT
 }
 
 /* ==========================================================================
-   MODAL & FORM STYLING (PERBAIKAN TAMPILAN)
+MODAL & FORM STYLING (PERBAIKAN TAMPILAN)
    ========================================================================== */
 
 .modal-overlay {
@@ -692,18 +707,22 @@ PLANT
 .modal-box {
     background: white;
     width: 100%;
-    max-width: 500px;
-    border-radius: 24px;
-    padding: 35px;
+    max-width: 400px;   /* sebelumnya 500px */
+    max-height: 60vh;   /* supaya tidak kepotong */
+    overflow-y: auto;
+
+    border-radius: 22px;
+    padding: 28px;      /* sebelumnya 35px */
+
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
     animation: popupFade 0.3s ease-out;
 }
 
 .modal-box h2 {
     color: #2e7d32;
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 25px;
+    font-size: 21px;
+    font-weight: 400;
+    margin-bottom: 18px;
     text-align: center;
 }
 

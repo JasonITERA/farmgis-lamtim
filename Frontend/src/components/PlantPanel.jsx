@@ -1,188 +1,110 @@
+// src/components/PlantPanel.jsx
 import { useState } from 'react';
+import PlantForm from './PlantForm';
 
-export default function PlantPanel() {
-const [plants, setPlants] = useState([
-    { id: 1, nama: 'Padi', masaTanam: '4 Bulan', warna: '#2e7d32' },
-    { id: 2, nama: 'Jagung', masaTanam: '3 Bulan', warna: '#fbc02d' }
-]);
+export default function PlantPanel({ plants = [], onSave, onDelete }) {
+    const [showForm, setShowForm] = useState(false);
+    const [editingPlant, setEditingPlant] = useState(null);
 
-const [showPopup, setShowPopup] = useState(false);
-const [formData, setFormData] = useState({
-    nama: "",
-    masaTanam: ""
-});
+    return (
+        <div className="panel-group">
+            <div className="plant-panel-title">
+                <h3>Data Tanaman & Masa Tanam</h3>
+            </div>
 
-  // Fungsi untuk Menghapus Tanaman
-const handleDelete = (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus data tanaman ini?")) {
-    const updatedPlants = plants.filter(plant => plant.id !== id);
-    setPlants(updatedPlants);
-    }
-};
-
-const handleSave = (e) => {
-    e.preventDefault();
-    if (formData.nama && formData.masaTanam) {
-    const newEntry = {
-        id: Date.now(),
-        ...formData,
-        warna: '#4caf50' 
-    };
-    setPlants([...plants, newEntry]);
-    setFormData({ nama: "", masaTanam: "" });
-    setShowPopup(false); 
-    }
-};
-
-return (
-    <div className="panel-group">
-
-        <div className="plant-panel-title">
-            <h3>Data Tanaman & Masa Tanam</h3>
-        </div>
-
-        <div className="panel-content">
-
-            <div className="plant-panel-body">
-
-                <table className="owner-table">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Jenis Tanaman</th>
-                            <th>Masa Tanam</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {plants.length > 0 ? (
-                            plants.map((plant, index) => (
-                                <tr key={plant.id}>
-
-                                    <td>{index + 1}</td>
-
-                                    <td className="plant-name-cell">
-                                        <span
-                                            className="color-dot"
-                                            style={{
-                                                backgroundColor: plant.warna
-                                            }}
-                                        ></span>
-
-                                        {plant.nama}
-                                    </td>
-
-                                    <td>{plant.masaTanam}</td>
-
-                                    <td>
-                                        <div className="action-btns">
-
-                                            <button
-                                                className="action-btn delete"
-                                                onClick={() => handleDelete(plant.id)}
-                                                title="Hapus Tanaman"
-                                            >
-                                                🗑️
-                                            </button>
-
-                                        </div>
-                                    </td>
-
-                                </tr>
-                            ))
-                        ) : (
+            <div className="panel-content">
+                <div className="plant-panel-body">
+                    <table className="owner-table">
+                        <thead>
                             <tr>
-                                <td colSpan="4" className="empty-state">
-                                    Data tanaman kosong
-                                </td>
+                                <th>No</th>
+                                <th>Jenis Tanaman</th>
+                                <th>Masa Tanam</th>
+                                <th>Aksi</th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {plants && plants.length > 0 ? (
+                                plants.map((plant, index) => {
+                                    // Ambil ID unik murni dari FastAPI/PostgreSQL
+                                    const plantId = plant.id_tanaman || plant.id;
+                                    
+                                    // Membaca key asli dari database agar sinkron
+                                    const namaTanaman = plant.jenis_tanaman || plant.nama_tanaman || plant.nama || "Tanaman Tanpa Nama";
+                                    const masaTanam = plant.masa_tanam || plant.periode_tanam || plant.masaTanam || "Tidak ada data";
 
-                <button
-                    className="btn-add-small"
-                    onClick={() => setShowPopup(true)}
-                    style={{ marginTop: '20px' }}
-                >
-                    + Tambah Data Tanaman
-                </button>
+                                    return (
+                                        <tr key={plantId || index}>
+                                            <td>{index + 1}</td>
+                                            <td className="plant-name-cell">
+                                                <span
+                                                    className="color-dot"
+                                                    style={{ backgroundColor: plant.warna || '#4caf50' }}
+                                                ></span>
+                                                {namaTanaman}
+                                            </td>
+                                            <td>{masaTanam}</td>
+                                            <td>
+                                                <div className="action-btns">
+                                                    <button 
+                                                        className="action-btn edit"
+                                                        onClick={() => {
+                                                            // PERBAIKAN UTAMA: Mengunci data objek AND mengaktifkan showForm bersamaan
+                                                            setEditingPlant({
+                                                                id_tanaman: plantId,
+                                                                jenis_tanaman: namaTanaman,
+                                                                masa_tanam: masaTanam
+                                                            });
+                                                            setShowForm(true); 
+                                                        }}
+                                                    >✏️</button>
+                                                    <button
+                                                        className="action-btn delete"
+                                                        onClick={() => {
+                                                            if (window.confirm(`Hapus data tanaman ${namaTanaman}?`)) {
+                                                                onDelete(plantId);
+                                                            }
+                                                        }}
+                                                    >🗑️</button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan="4" className="empty-state" style={{ textAlign: 'center', padding: '20px' }}>
+                                        Belum ada data tanaman
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
 
-            </div>
-
-        </div>
-
-        {/* MODAL */}
-        {showPopup && (
-            <div className="modal-overlay">
-
-                <div className="modal-box">
-
-                    <h2>Tambah Data Tanaman</h2>
-
-                    <form onSubmit={handleSave}>
-
-                        <div className="form-group">
-                            <label>Jenis Tanaman</label>
-
-                            <input
-                                type="text"
-                                placeholder="Contoh: Kedelai..."
-                                value={formData.nama}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        nama: e.target.value
-                                    })
-                                }
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Masa Tanam</label>
-
-                            <input
-                                type="text"
-                                placeholder="Contoh: 3 Bulan..."
-                                value={formData.masaTanam}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        masaTanam: e.target.value
-                                    })
-                                }
-                                required
-                            />
-                        </div>
-
-                        <div className="modal-actions">
-
-                            <button
-                                type="button"
-                                className="btn-cancel"
-                                onClick={() => setShowPopup(false)}
-                            >
-                                Batal
-                            </button>
-
-                            <button
-                                type="submit"
-                                className="btn-save"
-                            >
-                                Simpan
-                            </button>
-
-                        </div>
-
-                    </form>
-
+                    <button
+                        className="btn-add-small"
+                        onClick={() => {
+                            setEditingPlant(null);
+                            setShowForm(true);
+                        }}
+                        style={{ marginTop: '20px' }}
+                    >
+                        + Tambah Data Tanaman
+                    </button>
                 </div>
-
             </div>
-        )}
 
-    </div>
-);
-};
+            {/* PERBAIKAN KONDISI: Merujuk penuh pada state showForm agar siklus hidup komponen Form stabil */}
+            {showForm && (
+                <PlantForm 
+                    initialData={editingPlant}
+                    onClose={() => {
+                        setShowForm(false);
+                        setEditingPlant(null);
+                    }} 
+                    onSave={onSave}
+                />
+            )}
+        </div>
+    );
+}

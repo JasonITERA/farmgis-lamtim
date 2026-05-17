@@ -1,0 +1,14 @@
+Aktivasi virtual environment
+
+Eksekusi di terminal
+----> .venv/scripts/activate
+
+
+Untuk menonaktifkan virtual environment
+----> deactivate
+
+untuk menjalankan Server Backend
+
+Eksekusi di terminal (D:\Projects\farmgis-lamtim\Backend\app)
+----> uvicorn main:app --reload
+----> uvicorn app.main:app --reload
